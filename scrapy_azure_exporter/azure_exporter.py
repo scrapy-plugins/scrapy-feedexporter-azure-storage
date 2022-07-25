@@ -29,7 +29,7 @@ class AzureFeedStorage(BlockingFeedStorage):
         self.account_url_with_sas_token = account_url_with_sas_token
         self.account_url = account_url
         self.account_key = account_key
-        self.overwrite = feed_options.get("overwrite")
+        self.overwrite = feed_options.get("overwrite", False)
         self.blob_type = feed_options.get("blob_type", "BlockBlob")
 
         if self.blob_type not in BlobType.__members__.values():
