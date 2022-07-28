@@ -32,7 +32,7 @@ class AzureFeedStorage(BlockingFeedStorage):
         self.overwrite = feed_options.get("overwrite", False)
         self.blob_type = feed_options.get("blob_type", "BlockBlob")
 
-        if self.blob_type not in BlobType.__members__.values():
+        if self.blob_type not in (BlobType.BLOCKBLOB, BlobType.APPENDBLOB):
             raise NotConfigured("Please specify the correct blob_type")
 
         extracted_params = self.parse_azure_uri(uri)
