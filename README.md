@@ -48,7 +48,7 @@ pip install git+https://github.com/scrapy-plugins/scrapy-feedexporter-azure-stor
    - batch_item_count
  - The following ones are specific to this storage backend.
    - `overwrite` - Default is `False`
-   - `blob_type` - The Azure Blob Types. This can be `"AppendBlob"` or `"BlockBlob"`. Default is `"BlockBlob"`. ([Ref](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-pageblob-overview?tabs=dotnet))
+   - `blob_type` - The Azure Blob Types. This can be `"AppendBlob"` or `"BlockBlob"`. Default is `"BlockBlob"`. (See [Understanding blob types](https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-block-blobs--append-blobs--and-page-blobs))
    - The feed_options `overwrite` and `blob_type` can be used in combination to serve different modes.
      - `overwrite=False` and `blob_type="BlockBlob"`
        - Create the blob if it does not exist. If it already exists, the `azure.core.exceptions.ResourceExistsError` exception will be raised.
