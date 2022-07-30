@@ -47,7 +47,13 @@ pip install git+https://github.com/scrapy-plugins/scrapy-feedexporter-azure-stor
    - uri_params
    - batch_item_count
  - The following ones are specific to this storage backend.
+   - `overwrite` - Default is `False`
    - `blob_type` - The Azure Blob Types. This can be `"AppendBlob"` or `"BlockBlob"`. Default is `"BlockBlob"`. ([Ref](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-pageblob-overview?tabs=dotnet))
-   - `overwrite` - Whether to overwrite the file if it already exists (True) or append to its content (False).
-     - It's worth mentioning that for appending to the file, the conditions: `overwrite=False` and `blob_type="AppendBlob"` should be met. Because files can be appended only when using `AppendBlob` For more info, see ([Understanding blob types](https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-block-blobs--append-blobs--and-page-blobs))
+   - The feed_options `overwrite` and `blob_type` can be used in combination to serve different modes.
+     - `overwrite=False` and `blob_type="BlockBlob"`
+       - Create the blob if it does not exist. If it already exists, the `azure.core.exceptions.ResourceExistsError` exception will be raised.
+     - `overwrite=False` and `blob_type="AppendBlob"`
+       - Append the blob if it exists (The blob to which you're appending should be an AppendBlob). If it doesn't exist, create it. 
+     - `overwrite=True` and any `blob_type`
+       - overwrite the blob, even if it exists. However, blobs can only be overwritten if the blob_type remains same. For example. you can overwrite a `BlockBlob` by `BlockBlob` only.
  - The `postprocessing` feed option is currently unsupported.
