@@ -33,27 +33,18 @@ pip install git+https://github.com/scrapy-plugins/scrapy-feedexporter-azure-stor
         }
     }
     ```
-## Supported feed options
- - The below feed options are supported. See their usage and details [here](https://docs.scrapy.org/en/latest/topics/feed-exports.html#feeds).
-   - format
-   - encoding
-   - fields
-   - item_classes
-   - item_filter
-   - indent
-   - item_export_kwargs
-   - overwrite
-   - store_empty
-   - uri_params
-   - batch_item_count
- - The following ones are specific to this storage backend.
-   - `overwrite` - Default is `False`
-   - `blob_type` - The Azure Blob Types. This can be `"AppendBlob"` or `"BlockBlob"`. Default is `"BlockBlob"`. (See [Understanding blob types](https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-block-blobs--append-blobs--and-page-blobs))
-   - The feed_options `overwrite` and `blob_type` can be used in combination to serve different modes.
-     - `overwrite=False` and `blob_type="BlockBlob"`
-       - Create the blob if it does not exist. If it already exists, the `azure.core.exceptions.ResourceExistsError` exception will be raised.
-     - `overwrite=False` and `blob_type="AppendBlob"`
-       - Append the blob if it exists (The blob to which you're appending should be an AppendBlob). If it doesn't exist, create it. 
-     - `overwrite=True` and any `blob_type`
-       - overwrite the blob, even if it exists. However, blobs can only be overwritten if the blob_type remains same. For example. you can overwrite a `BlockBlob` by `BlockBlob` only.
- - The `postprocessing` feed option is currently unsupported.
+## Write mode and blob type
+The `overwrite`
+[feed option](https://docs.scrapy.org/en/latest/topics/feed-exports.html#feed-options)
+is `False` by default when using this feed export storage backend.
+An extra feed option is also provided, `blob_type`, which can be `"BlockBlob"` 
+(default) or `"AppendBlob"`. See 
+[Understanding blob types](https://docs.microsoft.com/en-us/rest/api/storageservices/understanding-block-blobs--append-blobs--and-page-blobs).
+The feed options `overwrite` and `blob_type` can be combined to set the write
+mode of the feed export:
+- `overwrite=False` and `blob_type="BlockBlob"` create the blob if it does not 
+  exist, and fail if it exists.
+- `overwrite=False` and `blob_type="AppendBlob"` append to the blob if it 
+  exists and it is an `AppendBlob`, and create it otherwise. 
+- `overwrite=True` overwrites the blob, even if it exists. The `blob_type` must
+  match that of the target blob.
