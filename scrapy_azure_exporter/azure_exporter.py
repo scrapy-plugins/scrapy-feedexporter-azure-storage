@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import typing
 from urllib.parse import urlparse
 
@@ -8,6 +9,8 @@ from azure.storage.blob import BlobServiceClient
 from azure.storage.blob._models import BlobType
 from scrapy.exceptions import NotConfigured
 from scrapy.extensions.feedexport import BlockingFeedStorage
+
+logger = logging.getLogger(__name__)
 
 
 class AzureFeedStorage(BlockingFeedStorage):
@@ -25,6 +28,7 @@ class AzureFeedStorage(BlockingFeedStorage):
     ):
         if feed_options is None:
             feed_options = {}
+
         self.connection_string = connection_string
         self.account_url_with_sas_token = account_url_with_sas_token
         self.account_url = account_url
@@ -36,11 +40,13 @@ class AzureFeedStorage(BlockingFeedStorage):
             raise NotConfigured("Please specify the correct blob_type")
 
         extracted_params = self.parse_azure_uri(uri)
+
         if not extracted_params:
             raise NotConfigured(
                 "Please provide URI according to this format,"
                 "azure://<account_name>.blob.core.windows.net/<container_name>/<file_name.extension>"
             )
+
         self.container_name = extracted_params.get("container_name")
         self.export_file_name = extracted_params.get("export_file_name")
 
@@ -90,6 +96,7 @@ class AzureFeedStorage(BlockingFeedStorage):
     def parse_azure_uri(cls, uri):
         "Takes in uri and extracts container name and filename"
         extracted_params = {}
+
         try:
             parsed_url = urlparse(uri)
             # split till 2nd occurrence of slash,
@@ -97,17 +104,25 @@ class AzureFeedStorage(BlockingFeedStorage):
             splitted = parsed_url.path.split("/", 2)
             container_name = splitted[1]
             file_name = splitted[2]
+
             if (
                 not container_name
                 or not file_name
                 or not os.path.basename(parsed_url.path)
             ):
                 return
+
+            if not re.search(r".+\.\w+$", file_name):
+                extracted_params["container_name"] = file_name
+                extracted_params["export_file_name"] = None
+                logger.debug("Extracted Params: %s", extracted_params)
+                return extracted_params
+
             extracted_params["container_name"] = container_name
             extracted_params["export_file_name"] = file_name
             return extracted_params
         except IndexError:
             return
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
             return
