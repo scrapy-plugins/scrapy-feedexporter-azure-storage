@@ -100,23 +100,23 @@ class AzureFeedStorage(BlockingFeedStorage):
         try:
             parsed_url = urlparse(uri)
             # split till 2nd occurrence of slash,
-            # so we can get container name and file name seperated.
-            splitted = parsed_url.path.split("/", 2)
+            # so we can get container name and file name separated.
+            # NOTE: A rsplit is necessary for compatibility with
+            # Azurite that have the path in the format
+            # `/<account_name>/<container_name>/<filename.ext>`
+            splitted = parsed_url.path.rsplit("/", 2)
             container_name = splitted[1]
-            file_name = splitted[2]
+            file_name = splitted[2] if splitted[2] else None
 
+            # NOTE: In case `file_name` is `None` it should be
+            # a valid condition, since it is assumed that the
+            # user wants to use the container to save all files
+            # from a pipeline
             if (
                 not container_name
-                or not file_name
                 or not os.path.basename(parsed_url.path)
             ):
                 return
-
-            if not re.search(r".+\.\w+$", file_name):
-                extracted_params["container_name"] = file_name
-                extracted_params["export_file_name"] = None
-                logger.debug("Extracted Params: %s", extracted_params)
-                return extracted_params
 
             extracted_params["container_name"] = container_name
             extracted_params["export_file_name"] = file_name
