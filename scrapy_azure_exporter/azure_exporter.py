@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import typing
 from urllib.parse import urlparse
 
@@ -101,27 +100,33 @@ class AzureFeedStorage(BlockingFeedStorage):
             parsed_url = urlparse(uri)
             # split till 2nd occurrence of slash,
             # so we can get container name and file name separated.
-            # NOTE: A rsplit is necessary for compatibility with
+            # NOTE: This workaround is necessary for compatibility with
             # Azurite that have the path in the format
             # `/<account_name>/<container_name>/<filename.ext>`
-            splitted = parsed_url.path.rsplit("/", 2)
+            splitted = parsed_url.path.split("/", 2)
             container_name = splitted[1]
-            file_name = splitted[2] if splitted[2] else None
+            file_name = splitted[2]
+
+            if parsed_url.scheme == "http":
+                splitted = parsed_url.path.split("/", 3)
+                container_name = splitted[2]
+                file_name = None
+
+                if len(splitted) > 3:
+                    file_name = splitted[3]
 
             # NOTE: In case `file_name` is `None` it should be
             # a valid condition, since it is assumed that the
             # user wants to use the container to save all files
             # from a pipeline
-            if (
-                not container_name
-                or not os.path.basename(parsed_url.path)
-            ):
+            if not container_name or not os.path.basename(parsed_url.path):
                 return
 
             extracted_params["container_name"] = container_name
             extracted_params["export_file_name"] = file_name
             return extracted_params
-        except IndexError:
+        except IndexError as e:
+            logger.error(e)
             return
         except Exception as e:
             logger.error(e)
