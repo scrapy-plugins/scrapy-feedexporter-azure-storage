@@ -51,31 +51,13 @@ mode of the feed export:
 
 ## Media pipeline usage
 
-Create a custom pipeline for [Scrapy media pipelines](https://docs.scrapy.org/en/latest/topics/media-pipeline.html) and be able to use Azure Blob Storage.
+Use the Azure pipeline for [Scrapy media pipelines](https://docs.scrapy.org/en/latest/topics/media-pipeline.html) and be able to use Azure Blob Storage.
 
-```python
-from scrapy.pipelines.files import FilesPipeline as FSPipeline
-from scrapy_azure_exporter.azure_store import AzureFilesStore
-
-
-class FilesPipeline(FSPipeline):
-    @classmethod
-    def from_settings(cls, settings):
-        azure_store = AzureFilesStore
-        azure_store.AZURE_CONNECTION_STRING = settings.get("AZURE_CONNECTION_STRING")
-        azure_store.AZURE_ACCOUNT_URL_WITH_SAS_TOKEN = settings.get("AZURE_ACCOUNT_URL_WITH_SAS_TOKEN")
-        azure_store.AZURE_ACCOUNT_URL = settings.get("AZURE_ACCOUNT_URL")
-        azure_store.AZURE_ACCOUNT_KEY = settings.get("AZURE_ACCOUNT_KEY")
-
-        cls.STORE_SCHEMES.update({"azure": azure_store})
-        return cls(settings.get("FILES_STORE"), settings=settings)
-```
-
-Add the pipeline to Scrapy:
+Just add the pipeline to Scrapy:
 
 ```python
 ITEM_PIPELINES = {
-    "path.to.FilesPipeline": 1,
+    "path.to.AzureFilesPipeline": 1,
 }
 ```
 
@@ -83,10 +65,5 @@ ITEM_PIPELINES = {
 
 You can use [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio) as a storage emulator for Azure Blob Storage
 and test your application locally.
-
-```python
-# NOTE: The "http" schema is necessary to compatibility with Azurite
-cls.STORE_SCHEMES.update({"azure": azure_store, "http": azure_store})
-```
 
 And finally run your Scrapy project as it is usually done for FilesPipeline or ImagesPipeline.
