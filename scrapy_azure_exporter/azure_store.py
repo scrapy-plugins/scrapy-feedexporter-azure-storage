@@ -23,6 +23,15 @@ class AzureFilesStore:
             account_url=self.AZURE_ACCOUNT_URL,
             account_key=self.AZURE_ACCOUNT_KEY,
         )
+        
+    @classmethod
+    def new(cls, settings):
+        azure_fs = cls
+        azure_fs.AZURE_CONNECTION_STRING = settings.get("AZURE_CONNECTION_STRING")
+        azure_fs.AZURE_ACCOUNT_URL_WITH_SAS_TOKEN = settings.get("AZURE_ACCOUNT_URL_WITH_SAS_TOKEN")
+        azure_fs.AZURE_ACCOUNT_URL = settings.get("AZURE_ACCOUNT_URL")
+        azure_fs.AZURE_ACCOUNT_KEY = settings.get("AZURE_ACCOUNT_KEY")
+        return azure_fs
 
     def stat_file(self, path, info):
         def _onsuccess(blob_client):
