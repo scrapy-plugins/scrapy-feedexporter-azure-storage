@@ -49,25 +49,9 @@ mode of the feed export:
 - `overwrite=True` overwrites the blob, even if it exists. The `blob_type` must
   match that of the target blob.
 
-## Store any data in Azure Blob Storage
-It is possible to store any kind of data directly to Azure Blob Storage just
-by using the `AZURE_ACCOUNT_URL` and `AZURE_ACCOUNT_KEY` settings, also the `FILE_STORE`
-or `IMAGE_STORE` settings with the URI to the Azure Blob Storage account or the local
-container provided by [Azurite](https://github.com/Azure/Azurite).
+## Media pipeline usage
 
-### Usage
-Suppose that you want to extract all images from a website and save it into a folder in
-your Azure Blob Storage, but first you need to test it locally using Azurite.
-
-1. In the project settings do the initial setup.
-
-```python
-FILES_STORE = "http://127.0.0.1:10000/<account>/<container>"
-AZURE_ACCOUNT_URL = "http://127.0.0.1:10000/<account>"
-AZURE_ACCOUNT_KEY = "<account_key>"
-```
-
-2. Create your own Pipeline
+Create a custom pipeline for [Scrapy media pipelines](https://docs.scrapy.org/en/latest/topics/media-pipeline.html) and be able to use Azure Blob Storage.
 
 ```python
 from scrapy.pipelines.files import FilesPipeline as FSPipeline
@@ -83,17 +67,26 @@ class FilesPipeline(FSPipeline):
         azure_store.AZURE_ACCOUNT_URL = settings.get("AZURE_ACCOUNT_URL")
         azure_store.AZURE_ACCOUNT_KEY = settings.get("AZURE_ACCOUNT_KEY")
 
-        # NOTE: The "http" schema is necessary to compatibility with Azurite
-        cls.STORE_SCHEMES.update({"azure": azure_store, "http": azure_store})
+        cls.STORE_SCHEMES.update({"azure": azure_store})
         return cls(settings.get("FILES_STORE"), settings=settings)
 ```
 
-3. Add the pipeline to Scrapy
+Add the pipeline to Scrapy:
 
 ```python
 ITEM_PIPELINES = {
     "path.to.FilesPipeline": 1,
 }
+```
+
+## Azurite usage
+
+You can use [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio) as a storage emulator for Azure Blob Storage
+and test your application locally.
+
+```python
+# NOTE: The "http" schema is necessary to compatibility with Azurite
+cls.STORE_SCHEMES.update({"azure": azure_store, "http": azure_store})
 ```
 
 And finally run your Scrapy project as it is usually done for FilesPipeline or ImagesPipeline.
