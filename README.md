@@ -57,13 +57,28 @@ Just add the pipeline to Scrapy:
 
 ```python
 ITEM_PIPELINES = {
-    "path.to.AzureFilesPipeline": 1,
+    "scrapy_azure_exporter.AzureFilesPipeline": 1,
 }
 ```
 
 ## Azurite usage
 
 You can use [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio) as a storage emulator for Azure Blob Storage
-and test your application locally.
+and test your application locally. Just append or set the feed storage to `azurite`.
+
+```python
+# settings.py
+FEED_STORAGES = {'azurite': 'scrapy_azure_exporter.AzureFeedStorage'}
+```
+
+And add the Azurite URI to the `FEEDS` setting:
+
+```python
+FEEDS = {
+    "azurite://<ip>:<port>/<account_name>/<container_name>/[<file_name.extension>]": {
+        // ...
+    }
+}
+```
 
 And finally run your Scrapy project as it is usually done for FilesPipeline or ImagesPipeline.
