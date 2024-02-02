@@ -10,7 +10,7 @@ class AzurePipelineMixin:
         pipeline.STORE_SCHEMES.update(
             {
                 "azure": AzureFilesStore.new(settings),
-                "http": AzureFilesStore.new(settings),
+                "azurite": AzureFilesStore.new(settings),
             }
         )
         return pipeline

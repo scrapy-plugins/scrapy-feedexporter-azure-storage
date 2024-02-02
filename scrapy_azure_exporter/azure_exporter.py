@@ -57,6 +57,8 @@ class AzureFeedStorage(BlockingFeedStorage):
             elif connection_string:
                 self.blob_service_client = BlobServiceClient.from_connection_string(
                     conn_str=connection_string
+                    if "azurite" not in connection_string
+                    else connection_string.replace("azurite://", "http://")
                 )
             elif account_url_with_sas_token:
                 self.blob_service_client = BlobServiceClient(
@@ -107,7 +109,7 @@ class AzureFeedStorage(BlockingFeedStorage):
             container_name = splitted[1]
             file_name = splitted[2]
 
-            if parsed_url.scheme == "http":
+            if parsed_url.scheme == "azurite":
                 splitted = parsed_url.path.split("/", 3)
                 container_name = splitted[2]
                 file_name = None
