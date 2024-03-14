@@ -48,3 +48,37 @@ mode of the feed export:
   exists and it is an `AppendBlob`, and create it otherwise. 
 - `overwrite=True` overwrites the blob, even if it exists. The `blob_type` must
   match that of the target blob.
+
+## Media pipeline usage
+
+Use the Azure pipeline for [Scrapy media pipelines](https://docs.scrapy.org/en/latest/topics/media-pipeline.html) and be able to use Azure Blob Storage.
+
+Just add the pipeline to Scrapy:
+
+```python
+ITEM_PIPELINES = {
+    "scrapy_azure_exporter.AzureFilesPipeline": 1,
+}
+```
+
+## Azurite usage
+
+You can use [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio) as a storage emulator for Azure Blob Storage
+and test your application locally. Just append or set the feed storage to `azurite`.
+
+```python
+# settings.py
+FEED_STORAGES = {'azurite': 'scrapy_azure_exporter.AzureFeedStorage'}
+```
+
+And add the Azurite URI to the `FEEDS` setting:
+
+```python
+FEEDS = {
+    "azurite://<ip>:<port>/<account_name>/<container_name>/[<file_name.extension>]": {
+        // ...
+    }
+}
+```
+
+And finally run your Scrapy project as it is usually done for FilesPipeline or ImagesPipeline.
